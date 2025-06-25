@@ -1,0 +1,9 @@
+{
+  "webhook": "https://discord.com/api/webhooks/your-webhook-url",
+  "windows": ["Roblox", "Roblox1", "Roblox2", "Roblox3", "Roblox4", "Roblox5", "Roblox6"],
+  "idleMinutes": 10,
+  "rare_keywords": [
+    "secret", "1 in 2M", "1 in 3M", "1 in 5M", "1 in 10M",
+    "1/2m", "1/3m", "1/5m", "1/10m", "mythic", "ancient", "godly"
+  ]
+}
