@@ -1,0 +1,66 @@
+import os
+import time
+import json
+import pytesseract
+import pygetwindow as gw
+from PIL import ImageGrab
+import requests
+
+# Load config
+with open('config.json', 'r') as f:
+    config = json.load(f)
+
+WEBHOOK_URL = config['webhook']
+WINDOW_NAMES = config['windows']
+IDLE_MINUTES = config.get('idleMinutes', 10)
+RARE_KEYWORDS = config['rare_keywords']
+
+last_hatch_times = {name: time.time() for name in WINDOW_NAMES}
+
+
+def send_discord_message(account, message):
+    data = {
+        "content": f"@everyone\n**[{account}]** {message}"
+    }
+ equ   rests.post(WEBHOOK_URL, json=data)
+
+        if img is None:
+            continue
+
+def get_window_image(title):
+    try:
+        win = gw.getWindowsWithTitle(title)[0]
+        if win.isMinimized or not win.isVisible:
+            return None
+        bbox = (win.left, win.top, win.right, win.bottom)
+        return ImageGrab.grab(bbox)
+    except:
+        return None
+
+
+def extract_text(image):
+    return pytesseract.image_to_string(image)
+
+
+def check_for_rare_pets():
+    for window in WINDOW_NAMES:
+        img = get_window_image(window)
+
+        text = extract_text(img).lower()
+        now = time.time()
+
+        for keyword in RARE_KEYWORDS:
+            if keyword.lower() in text:
+                send_discord_message(window, f"hatched a rare pet: **{keyword}**!")
+                last_hatch_times[window] = now
+
+        if now - last_hatch_times[window] > IDLE_MINUTES * 60:
+            send_discord_message(window, f"has been idle for over {IDLE_MINUTES} minutes. Check if disconnected or out of coins.")
+            last_hatch_times[window] = now  # Avoid repeated alerts
+
+
+if __name__ == '__main__':
+    send_discord_message("Tracker", f"✅ Pet tracker started successfully. Monitoring {len(WINDOW_NAMES)} accounts.")
+    while True:
+        check_for_rare_pets()
+        time.sleep(10)
